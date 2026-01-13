@@ -42,3 +42,11 @@ Codex resolves skills by scope in this order:
 3. System/Admin scope (lowest priority)
 
 If a skill name exists in multiple scopes, the higher-precedence version is used. opence only writes repo-scoped skills.
+
+## Skill memory checkpoint
+
+Create or update skills when a change exposes a repeatable workflow, recurring pitfalls, or manual checks that should be automated.
+
+- Follow the skill-creator guidance: keep SKILL.md concise with name/description frontmatter.
+- Put long guidance in references/ and reusable code in scripts/.
+- Store project skills alongside opence skills in .claude/skills/ and .codex/skills/.

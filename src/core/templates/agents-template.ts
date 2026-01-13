@@ -63,6 +63,7 @@ Provide a review when changes are ready for validation.
 ### Compound
 After the change is complete:
 - Capture the problem, root cause, and fix in \`docs/solutions/\`.
+- If the change reveals a repeatable workflow or recurring manual checks, create/update a skill to capture it (follow the skill-creator guidance: keep SKILL.md concise with name/description frontmatter; use \`references/\` and \`scripts/\` for longer content).
 - Prompt to run \`opence archive <change-id>\` when documentation is complete.
 - Run \`opence validate --strict\` if anything looks off before archiving.
 

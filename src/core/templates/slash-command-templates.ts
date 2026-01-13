@@ -47,7 +47,11 @@ const compoundSteps = `**Steps**
    - If the conversation references a change loosely, run \`opence list\` to surface likely IDs, share the relevant candidates, and confirm which one the user intends.
    - Otherwise, ask the user which change to compound and wait for a confirmed change ID before proceeding.
 2. Create a documentation entry under \`docs/solutions/\` summarizing the problem, root cause, and fix.
-3. After documentation is complete, prompt to run \`opence archive <change-id>\` and explain that archiving applies spec updates.`;
+3. Skill memory checkpoint:
+   - If the change revealed a repeatable workflow, recurring pitfalls, or manual checks, create or update a skill to encode it.
+   - Follow the skill-creator guidance: keep SKILL.md concise with name/description frontmatter; move long guidance to \`references/\` and reusable code to \`scripts/\`.
+   - Store project skills in \`.claude/skills/\` (Claude/Copilot) and \`.codex/skills/\` (Codex).
+4. After documentation and any skill updates are complete, prompt to run \`opence archive <change-id>\` and explain that archiving applies spec updates.`;
 
 const compoundReferences = `**Reference**
 - Use \`opence list\` to confirm change IDs before documenting.

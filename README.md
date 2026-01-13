@@ -53,7 +53,7 @@ It also generates opence Plan/Work/Review/Compound commands and skills for the t
 - Plan: create proposal/tasks/spec deltas under opence/changes/<change-id>/.
 - Work: implement tasks in order and update task checkboxes.
 - Review: report prioritized findings with file references and test gaps.
-- Compound: document learnings in docs/solutions/ and prompt to archive.
+- Compound: document learnings in docs/solutions/, capture repeatable workflows as skills, and prompt to archive.
 
 ## Skills
 

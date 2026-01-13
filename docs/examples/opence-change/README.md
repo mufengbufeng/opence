@@ -13,6 +13,6 @@ This folder contains a complete Plan/Work/Review/Compound example.
 - opence-plan: creates proposal.md, tasks.md, and specs/onboarding/spec.md.
 - opence-work: implements tasks.md and updates checkboxes.
 - opence-review: produces a review summary with findings and test gaps.
-- opence-compound: writes docs/solutions/<entry> and prompts to archive.
+- opence-compound: writes docs/solutions/<entry>, captures repeatable workflows as skills, and prompts to archive.
 
 Use opence validate add-onboarding-checklist --strict to verify the spec delta format.

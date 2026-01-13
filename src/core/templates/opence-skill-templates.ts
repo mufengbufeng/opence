@@ -45,8 +45,8 @@ const SKILLS: Record<OpenceSkillId, SkillSpec> = {
   compound: {
     id: 'compound',
     name: 'opence-compound',
-    description: 'Document learnings and prepare to compound an opence change.',
-    shortDescription: 'Document learnings and archive.',
+    description: 'Document learnings, capture repeatable workflows as skills, and prepare to compound an opence change.',
+    shortDescription: 'Document learnings, capture skills, and archive.',
     allowedTools: COMPOUND_TOOLS,
   },
 };

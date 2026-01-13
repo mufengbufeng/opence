@@ -21,6 +21,30 @@ const POSTHOG_HOST = 'https://edge.opence.dev';
 let posthogClient: PostHog | null = null;
 let anonymousId: string | null = null;
 
+const createSilentResponse = () => {
+  if (typeof Response !== 'undefined') {
+    return new Response('', { status: 204 });
+  }
+  return {
+    status: 204,
+    text: async () => '',
+    json: async () => ({}),
+    headers: { get: () => null },
+  };
+};
+
+const safeFetch: typeof fetch = async (url, options) => {
+  try {
+    const response = await fetch(url, options);
+    if (response.status < 200 || response.status >= 400) {
+      return createSilentResponse() as Response;
+    }
+    return response;
+  } catch {
+    return createSilentResponse() as Response;
+  }
+};
+
 /**
  * Check if telemetry is enabled.
  *
@@ -81,6 +105,7 @@ function getClient(): PostHog {
       host: POSTHOG_HOST,
       flushAt: 1, // Send immediately, don't batch
       flushInterval: 0, // No timer-based flushing
+      fetch: safeFetch, // Prevent noisy logs on transient network errors
     });
   }
   return posthogClient;
