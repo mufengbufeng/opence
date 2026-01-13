@@ -1,0 +1,133 @@
+import path from "path";
+import os from "os";
+import { SlashCommandConfigurator } from "./base.js";
+import { SlashCommandId, TemplateManager } from "../../templates/index.js";
+import { FileSystemUtils } from "../../../utils/file-system.js";
+import { OPENCE_MARKERS } from "../../config.js";
+
+// Use POSIX-style paths for consistent logging across platforms.
+const FILE_PATHS: Record<SlashCommandId, string> = {
+  plan: ".codex/prompts/opence-plan.md",
+  work: ".codex/prompts/opence-work.md",
+  review: ".codex/prompts/opence-review.md",
+  compound: ".codex/prompts/opence-compound.md",
+};
+
+export class CodexSlashCommandConfigurator extends SlashCommandConfigurator {
+  readonly toolId = "codex";
+  readonly isAvailable = true;
+
+  protected getRelativePath(id: SlashCommandId): string {
+    return FILE_PATHS[id];
+  }
+
+  protected getFrontmatter(id: SlashCommandId): string | undefined {
+    // Codex supports YAML frontmatter with description and argument-hint fields,
+    // plus $ARGUMENTS to capture all arguments as a single string.
+    const frontmatter: Record<SlashCommandId, string> = {
+      plan: `---
+description: Create an opence plan and scaffold change artifacts.
+argument-hint: request or feature description
+---
+
+$ARGUMENTS`,
+      work: `---
+description: Implement an opence change and keep tasks in sync.
+argument-hint: change-id
+---
+
+$ARGUMENTS`,
+      review: `---
+description: Review an opence change with prioritized findings.
+argument-hint: change-id
+---
+
+$ARGUMENTS`,
+      compound: `---
+description: Document learnings and prepare to compound an opence change.
+argument-hint: change-id
+---
+
+$ARGUMENTS`,
+    };
+    return frontmatter[id];
+  }
+
+  private getGlobalPromptsDir(): string {
+    const home = (process.env.CODEX_HOME && process.env.CODEX_HOME.trim())
+      ? process.env.CODEX_HOME.trim()
+      : FileSystemUtils.joinPath(os.homedir(), ".codex");
+    return FileSystemUtils.joinPath(home, "prompts");
+  }
+
+  // Codex discovers prompts globally. Generate directly in the global directory
+  // and wrap shared body with markers.
+  async generateAll(projectPath: string, _openceDir: string): Promise<string[]> {
+    const createdOrUpdated: string[] = [];
+    for (const target of this.getTargets()) {
+      const body = TemplateManager.getSlashCommandBody(target.id).trim();
+      const promptsDir = this.getGlobalPromptsDir();
+      const filePath = FileSystemUtils.joinPath(
+        promptsDir,
+        path.basename(target.path)
+      );
+
+      await FileSystemUtils.createDirectory(path.dirname(filePath));
+
+      if (await FileSystemUtils.fileExists(filePath)) {
+        await this.updateFullFile(filePath, target.id, body);
+      } else {
+        const frontmatter = this.getFrontmatter(target.id);
+        const sections: string[] = [];
+        if (frontmatter) sections.push(frontmatter.trim());
+        sections.push(`${OPENCE_MARKERS.start}\n${body}\n${OPENCE_MARKERS.end}`);
+        await FileSystemUtils.writeFile(filePath, sections.join("\n") + "\n");
+      }
+
+      createdOrUpdated.push(target.path);
+    }
+    return createdOrUpdated;
+  }
+
+  async updateExisting(projectPath: string, _openceDir: string): Promise<string[]> {
+    const updated: string[] = [];
+    for (const target of this.getTargets()) {
+      const promptsDir = this.getGlobalPromptsDir();
+      const filePath = FileSystemUtils.joinPath(
+        promptsDir,
+        path.basename(target.path)
+      );
+      if (await FileSystemUtils.fileExists(filePath)) {
+        const body = TemplateManager.getSlashCommandBody(target.id).trim();
+        await this.updateFullFile(filePath, target.id, body);
+        updated.push(target.path);
+      }
+    }
+    return updated;
+  }
+
+  // Update both frontmatter and body in an existing file
+  private async updateFullFile(filePath: string, id: SlashCommandId, body: string): Promise<void> {
+    const content = await FileSystemUtils.readFile(filePath);
+    const startIndex = content.indexOf(OPENCE_MARKERS.start);
+
+    if (startIndex === -1) {
+      throw new Error(`Missing opence start marker in ${filePath}`);
+  }
+
+    // Replace everything before the start marker with the new frontmatter
+    const frontmatter = this.getFrontmatter(id);
+    const sections: string[] = [];
+    if (frontmatter) sections.push(frontmatter.trim());
+    sections.push(`${OPENCE_MARKERS.start}\n${body}\n${OPENCE_MARKERS.end}`);
+
+    await FileSystemUtils.writeFile(filePath, sections.join("\n") + "\n");
+  }
+
+  // Resolve to the global prompts location for configuration detection
+  resolveAbsolutePath(_projectPath: string, id: SlashCommandId): string {
+    const promptsDir = this.getGlobalPromptsDir();
+    const fileName = path.basename(FILE_PATHS[id]);
+    return FileSystemUtils.joinPath(promptsDir, fileName);
+  }
+}
