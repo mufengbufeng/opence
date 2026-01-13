@@ -8,7 +8,9 @@ import {
   OPENCE_SKILL_IDS,
   OpenceSkillVariant,
   getOpenceSkillSpec,
+  renderOpenceSkillContent,
   updateOpenceSkillContent,
+  getSkillCreatorReferences,
 } from './templates/opence-skill-templates.js';
 
 export class UpdateCommand {
@@ -154,14 +156,41 @@ export class UpdateCommand {
       for (const id of OPENCE_SKILL_IDS) {
         const spec = getOpenceSkillSpec(id);
         const skillFile = path.join(skillsRoot, spec.name, 'SKILL.md');
+        
         if (!await FileSystemUtils.fileExists(skillFile)) {
-          continue;
+          // Create new skill if it doesn't exist
+          const content = renderOpenceSkillContent(id, variant);
+          await FileSystemUtils.writeFile(skillFile, content);
+          updated.push(path.relative(projectPath, skillFile));
+          
+          // Create references/ directory for skill-creator
+          if (id === 'skill-creator') {
+            const referencesDir = path.join(skillsRoot, spec.name, 'references');
+            const references = getSkillCreatorReferences();
+            
+            for (const [filename, content] of Object.entries(references)) {
+              const refFile = path.join(referencesDir, filename);
+              await FileSystemUtils.writeFile(refFile, content);
+            }
+          }
+        } else {
+          // Update existing skill
+          const existing = await FileSystemUtils.readFile(skillFile);
+          const updatedContent = updateOpenceSkillContent(existing, id, variant);
+          await FileSystemUtils.writeFile(skillFile, updatedContent);
+          updated.push(path.relative(projectPath, skillFile));
+          
+          // Create or update references/ for skill-creator if needed
+          if (id === 'skill-creator') {
+            const referencesDir = path.join(skillsRoot, spec.name, 'references');
+            const references = getSkillCreatorReferences();
+            
+            for (const [filename, content] of Object.entries(references)) {
+              const refFile = path.join(referencesDir, filename);
+              await FileSystemUtils.writeFile(refFile, content);
+            }
+          }
         }
-
-        const existing = await FileSystemUtils.readFile(skillFile);
-        const updatedContent = updateOpenceSkillContent(existing, id, variant);
-        await FileSystemUtils.writeFile(skillFile, updatedContent);
-        updated.push(path.relative(projectPath, skillFile));
       }
     }
 

@@ -14,6 +14,7 @@ import { ValidateCommand } from '../commands/validate.js';
 import { ShowCommand } from '../commands/show.js';
 import { CompletionCommand } from '../commands/completion.js';
 import { registerConfigCommand } from '../commands/config.js';
+import { registerSkillCommand } from '../commands/skill.js';
 import { registerArtifactWorkflowCommands } from '../commands/artifact-workflow.js';
 import { maybeShowTelemetryNotice, trackCommand, shutdown } from '../telemetry/index.js';
 
@@ -242,6 +243,7 @@ program
 
 registerSpecCommand(program);
 registerConfigCommand(program);
+registerSkillCommand(program);
 
 // Top-level validate command
 program

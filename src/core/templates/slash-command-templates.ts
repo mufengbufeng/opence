@@ -1,4 +1,4 @@
-export type SlashCommandId = 'plan' | 'work' | 'review' | 'compound';
+export type SlashCommandId = 'plan' | 'work' | 'review' | 'compound' | 'archive';
 
 const baseGuardrails = `**Guardrails**
 - Favor straightforward, minimal implementations first and add complexity only when it is requested or clearly required.
@@ -49,19 +49,38 @@ const compoundSteps = `**Steps**
 2. Create a documentation entry under \`docs/solutions/\` summarizing the problem, root cause, and fix.
 3. Skill memory checkpoint:
    - If the change revealed a repeatable workflow, recurring pitfalls, or manual checks, create or update a skill to encode it.
-   - Follow the skill-creator guidance: keep SKILL.md concise with name/description frontmatter; move long guidance to \`references/\` and reusable code to \`scripts/\`.
-   - Store project skills in \`.claude/skills/\` (Claude/Copilot) and \`.codex/skills/\` (Codex).
-4. After documentation and any skill updates are complete, prompt to run \`opence archive <change-id>\` and explain that archiving applies spec updates.`;
+   - Consult the \`opence-skill-creator\` skill for guidance on skill structure, naming, and best practices.
+   - Use \`opence skill add <skill-name> --description "..."\` to create new skills; the command automatically creates proper structure in all configured tool directories.
+   - After creation, edit the SKILL.md file to add detailed instructions, examples, and guidelines.
+   - Move extensive documentation to \`references/\` and reusable code to \`scripts/\` as described in skill-creator skill.
+4. After documentation and any skill updates are complete, consult the \`opence-archive\` skill to finalize the change. The skill provides guidance on pre-archive verification, running \`opence archive <change-id>\`, and post-archive verification.`;
 
 const compoundReferences = `**Reference**
 - Use \`opence list\` to confirm change IDs before documenting.
+- Use \`opence skill list\` to see existing skills and avoid duplicates.
 - Keep documentation concise and focused on future reuse.`;
+
+const archiveSteps = `**Steps**
+1. Consult the \`opence-archive\` skill for comprehensive guidance on the archive workflow.
+2. Complete pre-archive verification:
+   - Run \`opence validate <change-id> --strict\` and ensure it passes.
+   - Run all tests and ensure they pass.
+   - Verify all tasks in \`tasks.md\` are marked [x] and reflect reality.
+   - Confirm proposal matches implementation.
+3. Run \`opence archive <change-id>\` to finalize the change.
+4. Review archive command output and confirm spec updates.
+5. Complete post-archive verification as guided by the skill.`;
+
+const archiveReferences = `**Reference**
+- The \`opence-archive\` skill provides detailed guidance on verification steps, command flags, output interpretation, and troubleshooting.
+- Use \`opence list\` to confirm the correct change ID before archiving.`;
 
 export const slashCommandBodies: Record<SlashCommandId, string> = {
   plan: [planGuardrails, planSteps, planReferences].join('\n\n'),
   work: [baseGuardrails, workSteps, workReferences].join('\n\n'),
   review: [baseGuardrails, reviewSteps, reviewReferences].join('\n\n'),
   compound: [baseGuardrails, compoundSteps, compoundReferences].join('\n\n'),
+  archive: [baseGuardrails, archiveSteps, archiveReferences].join('\n\n'),
 };
 
 export function getSlashCommandBody(id: SlashCommandId): string {

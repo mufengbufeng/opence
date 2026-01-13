@@ -1965,3 +1965,46 @@ Target archive directory already exists.
   };
 }
 
+/**
+ * Generate default user skill template content
+ */
+export function generateUserSkillTemplate(skillName: string, description: string): string {
+  return `# ${skillName}
+
+${description}
+
+## Instructions
+
+[Add detailed instructions for when and how to use this skill]
+
+### When to use this skill
+
+- [Scenario 1]
+- [Scenario 2]
+- [Scenario 3]
+
+### How to use this skill
+
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+### Examples
+
+[Add examples of using this skill]
+
+### Guidelines
+
+- [Guideline 1]
+- [Guideline 2]
+
+### References
+
+See the \`references/\` directory for additional documentation and context.
+
+### Scripts
+
+See the \`scripts/\` directory for reusable code and utilities.
+`;
+}
+

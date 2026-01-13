@@ -6,6 +6,7 @@ const FILE_PATHS: Record<SlashCommandId, string> = {
   work: '.claude/commands/opence/work.md',
   review: '.claude/commands/opence/review.md',
   compound: '.claude/commands/opence/compound.md',
+  archive: '.claude/commands/opence/archive.md',
 };
 
 const FRONTMATTER: Record<SlashCommandId, string> = {
@@ -32,6 +33,12 @@ name: opence: compound
 description: Document learnings and prepare to compound an opence change.
 category: opence
 tags: [opence, compound]
+---`,
+  archive: `---
+name: opence: archive
+description: Archive a completed change and apply spec updates.
+category: opence
+tags: [opence, archive]
 ---`,
 };
 

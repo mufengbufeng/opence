@@ -22,6 +22,7 @@ import {
   getOpenceSkillSpec,
   renderOpenceSkillContent,
   updateOpenceSkillContent,
+  getSkillCreatorReferences,
 } from './templates/opence-skill-templates.js';
 import {
   OpenceConfig,
@@ -831,6 +832,17 @@ export class InitCommand {
       } else {
         const content = renderOpenceSkillContent(id, variant);
         await FileSystemUtils.writeFile(skillFile, content);
+      }
+
+      // Create references/ directory for skill-creator
+      if (id === 'skill-creator') {
+        const referencesDir = path.join(skillsRoot, spec.name, 'references');
+        const references = getSkillCreatorReferences();
+        
+        for (const [filename, content] of Object.entries(references)) {
+          const refFile = path.join(referencesDir, filename);
+          await FileSystemUtils.writeFile(refFile, content);
+        }
       }
     }
   }

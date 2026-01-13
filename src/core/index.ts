@@ -10,3 +10,13 @@ export {
   saveGlobalConfig,
   getGlobalDataDir
 } from './global-config.js';
+
+export {
+  SkillManager,
+  validateSkillName,
+  type SkillInfo,
+  type SkillMetadata,
+  type CreateSkillOptions,
+  type UpdateSkillOptions,
+  type RemoveSkillOptions,
+} from './skill-manager.js';

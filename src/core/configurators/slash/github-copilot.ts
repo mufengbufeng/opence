@@ -6,6 +6,7 @@ const FILE_PATHS: Record<SlashCommandId, string> = {
   work: '.github/prompts/opence-work.prompt.md',
   review: '.github/prompts/opence-review.prompt.md',
   compound: '.github/prompts/opence-compound.prompt.md',
+  archive: '.github/prompts/opence-archive.prompt.md',
 };
 
 const FRONTMATTER: Record<SlashCommandId, string> = {
@@ -26,6 +27,11 @@ description: Review an opence change with prioritized findings.
 $ARGUMENTS`,
   compound: `---
 description: Document learnings and prepare to compound an opence change.
+---
+
+$ARGUMENTS`,
+  archive: `---
+description: Archive a completed change and apply spec updates.
 ---
 
 $ARGUMENTS`,

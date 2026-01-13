@@ -53,16 +53,41 @@ It also generates opence Plan/Work/Review/Compound commands and skills for the t
 - Plan: create proposal/tasks/spec deltas under opence/changes/<change-id>/.
 - Work: implement tasks in order and update task checkboxes.
 - Review: report prioritized findings with file references and test gaps.
-- Compound: document learnings in docs/solutions/, capture repeatable workflows as skills, and prompt to archive.
+- Compound: document learnings in docs/solutions/, capture repeatable workflows as skills, and finalize with archive.
 
 ## Skills
 
-opence generates skills using the Agent Skills format:
+opence generates native skills using the Agent Skills format:
 
-- .claude/skills/opence-{plan,work,review,compound}/SKILL.md (Claude Code and GitHub Copilot)
-- .codex/skills/opence-{plan,work,review,compound}/SKILL.md (Codex repo scope)
+- .claude/skills/opence-{plan,work,review,compound,archive,skill-creator}/SKILL.md (Claude Code and GitHub Copilot)
+- .codex/skills/opence-{plan,work,review,compound,archive,skill-creator}/SKILL.md (Codex repo scope)
+
+The `opence-skill-creator` skill provides guidance on creating effective project skills, including naming conventions, directory structure, and best practices. The `opence-archive` skill guides the final workflow step: archiving completed changes and applying spec updates.
 
 See docs/skills/skills-interop.md for tool-specific differences and precedence rules.
+
+### Managing custom skills
+
+opence provides commands to manage your own project skills:
+
+```bash
+# Create a new skill
+opence skill add my-skill --description "Description here"
+
+# List all skills (native + user-defined)
+opence skill list
+
+# Show skill details
+opence skill show my-skill
+
+# Update skill metadata
+opence skill update my-skill --description "New description"
+
+# Remove a skill
+opence skill remove my-skill
+```
+
+Skills are created in all configured AI tool directories (.claude/skills/, .codex/skills/) with proper frontmatter for each tool.
 
 ## Example change
 
@@ -71,10 +96,20 @@ See docs/examples/opence-change/ for a complete Plan/Work/Review/Compound exampl
 ## Command reference
 
 ```bash
+# Change management
 opence list
 opence show <item>
 opence validate <item>
 opence archive <change-id> --yes
+
+# Skill management
+opence skill add <name>
+opence skill list
+opence skill show <name>
+opence skill update <name>
+opence skill remove <name>
+
+# Project maintenance
 opence update
 ```
 

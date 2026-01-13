@@ -367,4 +367,82 @@ export const COMMAND_REGISTRY: CommandDefinition[] = [
       },
     ],
   },
+  {
+    name: 'skill',
+    description: 'Manage AI assistant skills in your project',
+    flags: [],
+    subcommands: [
+      {
+        name: 'add',
+        description: 'Create a new user-defined skill',
+        acceptsPositional: true,
+        flags: [
+          {
+            name: 'description',
+            description: 'Skill description',
+            takesValue: true,
+          },
+          {
+            name: 'allowed-tools',
+            description: 'Comma-separated list of allowed tools (Claude/Copilot only)',
+            takesValue: true,
+          },
+          {
+            name: 'short-description',
+            description: 'Short description for Codex',
+            takesValue: true,
+          },
+        ],
+      },
+      {
+        name: 'list',
+        description: 'List all skills in the project',
+        flags: [
+          COMMON_FLAGS.json,
+        ],
+      },
+      {
+        name: 'show',
+        description: 'Display detailed information about a skill',
+        acceptsPositional: true,
+        flags: [
+          COMMON_FLAGS.json,
+        ],
+      },
+      {
+        name: 'update',
+        description: 'Update an existing skill',
+        acceptsPositional: true,
+        flags: [
+          {
+            name: 'description',
+            description: 'New description',
+            takesValue: true,
+          },
+          {
+            name: 'allowed-tools',
+            description: 'Comma-separated list of allowed tools',
+            takesValue: true,
+          },
+          {
+            name: 'short-description',
+            description: 'New short description for Codex',
+            takesValue: true,
+          },
+        ],
+      },
+      {
+        name: 'remove',
+        description: 'Remove a skill from the project',
+        acceptsPositional: true,
+        flags: [
+          {
+            name: 'yes',
+            short: 'y',
+            description: 'Skip confirmation prompt',
+          },
+        ],
+      },
+    ],
+  },
 ];

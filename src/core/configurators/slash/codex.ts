@@ -11,6 +11,7 @@ const FILE_PATHS: Record<SlashCommandId, string> = {
   work: ".codex/prompts/opence-work.md",
   review: ".codex/prompts/opence-review.md",
   compound: ".codex/prompts/opence-compound.md",
+  archive: ".codex/prompts/opence-archive.md",
 };
 
 export class CodexSlashCommandConfigurator extends SlashCommandConfigurator {
@@ -45,6 +46,12 @@ argument-hint: change-id
 $ARGUMENTS`,
       compound: `---
 description: Document learnings and prepare to compound an opence change.
+argument-hint: change-id
+---
+
+$ARGUMENTS`,
+      archive: `---
+description: Archive a completed change and apply spec updates.
 argument-hint: change-id
 ---
 
