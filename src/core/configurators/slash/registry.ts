@@ -1,5 +1,6 @@
 import { SlashCommandConfigurator } from './base.js';
 import { ClaudeSlashCommandConfigurator } from './claude.js';
+import { OpenCodeSlashCommandConfigurator } from './opencode.js';
 import { CodexSlashCommandConfigurator } from './codex.js';
 import { GitHubCopilotSlashCommandConfigurator } from './github-copilot.js';
 
@@ -8,10 +9,12 @@ export class SlashCommandRegistry {
 
   static {
     const claude = new ClaudeSlashCommandConfigurator();
+    const opencode = new OpenCodeSlashCommandConfigurator();
     const codex = new CodexSlashCommandConfigurator();
     const githubCopilot = new GitHubCopilotSlashCommandConfigurator();
 
     this.configurators.set(claude.toolId, claude);
+    this.configurators.set(opencode.toolId, opencode);
     this.configurators.set(codex.toolId, codex);
     this.configurators.set(githubCopilot.toolId, githubCopilot);
   }

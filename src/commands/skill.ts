@@ -15,6 +15,75 @@ import { PALETTE } from '../core/styles/palette.js';
 const manager = new SkillManager();
 
 /**
+ * Valid tool names for allowed-tools validation
+ */
+const VALID_TOOL_NAMES = [
+  'Read', 'Write', 'Edit', 'Grep', 'Glob', 'Bash', 
+  'Task', 'TodoRead', 'TodoWrite', 'Question', 'Skill', 'WebFetch'
+];
+
+/**
+ * Default allowed tools when not specified in non-interactive mode
+ */
+const DEFAULT_ALLOWED_TOOLS = ['Read', 'Write', 'Edit', 'Grep', 'Glob', 'Bash'];
+
+/**
+ * Detect if running in non-interactive environment
+ */
+function isNonInteractiveEnvironment(): boolean {
+  // Check if CI environment
+  if (process.env.CI === 'true') {
+    return true;
+  }
+  
+  // Check if stdin is a TTY
+  if (!process.stdin.isTTY) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Validate and normalize tool names
+ */
+function validateAndNormalizeTools(toolsInput: string): { valid: boolean; tools?: string[]; error?: string } {
+  const toolNames = toolsInput
+    .split(',')
+    .map(t => t.trim())
+    .filter(t => t.length > 0);
+  
+  if (toolNames.length === 0) {
+    return { valid: false, error: 'At least one tool must be specified' };
+  }
+  
+  // Normalize to proper case
+  const normalized: string[] = [];
+  const invalid: string[] = [];
+  
+  for (const tool of toolNames) {
+    const validTool = VALID_TOOL_NAMES.find(
+      v => v.toLowerCase() === tool.toLowerCase()
+    );
+    
+    if (validTool) {
+      normalized.push(validTool);
+    } else {
+      invalid.push(tool);
+    }
+  }
+  
+  if (invalid.length > 0) {
+    return {
+      valid: false,
+      error: `Invalid tool name(s): ${invalid.join(', ')}. Valid tools: ${VALID_TOOL_NAMES.join(', ')}`
+    };
+  }
+  
+  return { valid: true, tools: normalized };
+}
+
+/**
  * Format skill tools for display
  */
 function formatTools(tools: string[]): string {
@@ -139,10 +208,12 @@ export function registerSkillCommand(program: Command): void {
     .option('--description <text>', 'Skill description')
     .option('--allowed-tools <tools>', 'Comma-separated list of allowed tools (Claude/Copilot only)')
     .option('--short-description <text>', 'Short description for Codex')
+    .option('--non-interactive', 'Run in non-interactive mode (auto-detected when flags are provided)')
     .action(async (name: string, options: {
       description?: string;
       allowedTools?: string;
       shortDescription?: string;
+      nonInteractive?: boolean;
     }) => {
       try {
         const projectPath = path.resolve('.');
@@ -161,25 +232,62 @@ export function registerSkillCommand(program: Command): void {
           process.exit(1);
         }
 
+        // Determine if running in non-interactive mode
+        const isNonInteractive = options.nonInteractive || 
+                                 isNonInteractiveEnvironment() ||
+                                 (options.description !== undefined || options.allowedTools !== undefined);
+
         // Get or prompt for options
         let description = options.description;
         if (!description) {
-          description = await input({
-            message: 'Description:',
-            validate: (value) => value.length > 0 || 'Description is required',
-          });
+          if (isNonInteractive) {
+            console.error(chalk.red("Error: Description is required in non-interactive mode."));
+            console.error(chalk.gray("Use: --description 'Your description'"));
+            console.error(chalk.gray("Example: opence skill add my-skill --description 'My skill description' --allowed-tools 'Read,Write,Bash'"));
+            process.exit(1);
+          }
+          
+          try {
+            description = await input({
+              message: 'Description:',
+              validate: (value) => value.length > 0 || 'Description is required',
+            });
+          } catch (error: any) {
+            // Handle prompt cancellation
+            console.error(chalk.red('\nError: Interactive prompt failed.'));
+            console.error(chalk.gray("For automated execution, use flags:"));
+            console.error(chalk.gray("  opence skill add <name> --description 'Your description' --allowed-tools 'Read,Write,Bash'"));
+            process.exit(1);
+          }
         }
 
         let allowedTools: string[] | undefined;
         if (tools.includes('claude')) {
           if (options.allowedTools) {
-            allowedTools = options.allowedTools.split(',').map(t => t.trim());
+            // Validate and normalize tool names
+            const validation = validateAndNormalizeTools(options.allowedTools);
+            if (!validation.valid) {
+              console.error(chalk.red(`Error: ${validation.error}`));
+              process.exit(1);
+            }
+            allowedTools = validation.tools;
+          } else if (isNonInteractive) {
+            // Use defaults in non-interactive mode
+            allowedTools = DEFAULT_ALLOWED_TOOLS;
           } else {
-            const defaultTools = ['Read', 'Write', 'Bash', 'Grep', 'Glob'];
-            allowedTools = await checkbox({
-              message: 'Allowed tools (for Claude/Copilot):',
-              choices: defaultTools.map(t => ({ value: t, checked: true })),
-            });
+            try {
+              const defaultTools = ['Read', 'Write', 'Bash', 'Grep', 'Glob', 'Edit', 'Task'];
+              allowedTools = await checkbox({
+                message: 'Allowed tools (for Claude/Copilot):',
+                choices: defaultTools.map(t => ({ value: t, checked: false })),
+              });
+            } catch (error: any) {
+              // Handle prompt cancellation
+              console.error(chalk.red('\nError: Interactive prompt failed.'));
+              console.error(chalk.gray("For automated execution, use flags:"));
+              console.error(chalk.gray("  opence skill add <name> --description 'Your description' --allowed-tools 'Read,Write,Bash'"));
+              process.exit(1);
+            }
           }
         }
 
@@ -282,10 +390,12 @@ export function registerSkillCommand(program: Command): void {
     .option('--description <text>', 'New description')
     .option('--allowed-tools <tools>', 'Comma-separated list of allowed tools')
     .option('--short-description <text>', 'New short description for Codex')
+    .option('--non-interactive', 'Run in non-interactive mode (auto-detected when flags are provided)')
     .action(async (name: string, options: {
       description?: string;
       allowedTools?: string;
       shortDescription?: string;
+      nonInteractive?: boolean;
     }) => {
       try {
         const projectPath = path.resolve('.');
@@ -303,34 +413,63 @@ export function registerSkillCommand(program: Command): void {
           process.exit(1);
         }
 
+        // Determine if running in non-interactive mode
+        const isNonInteractive = options.nonInteractive || 
+                                 isNonInteractiveEnvironment() ||
+                                 (options.description !== undefined || 
+                                  options.allowedTools !== undefined || 
+                                  options.shortDescription !== undefined);
+
         // Get or prompt for updates
         const updateOptions: UpdateSkillOptions = {};
 
         if (options.description !== undefined) {
           updateOptions.description = options.description;
-        } else {
-          const newDescription = await input({
-            message: 'New description:',
-            default: skill.description,
-          });
-          if (newDescription !== skill.description) {
-            updateOptions.description = newDescription;
+        } else if (!isNonInteractive) {
+          try {
+            const newDescription = await input({
+              message: 'New description:',
+              default: skill.description,
+            });
+            if (newDescription !== skill.description) {
+              updateOptions.description = newDescription;
+            }
+          } catch (error: any) {
+            // Handle prompt cancellation
+            console.error(chalk.red('\nError: Interactive prompt failed.'));
+            console.error(chalk.gray("For automated execution, use flags:"));
+            console.error(chalk.gray("  opence skill update <name> --description 'New description' --allowed-tools 'Read,Write,Bash'"));
+            process.exit(1);
           }
         }
 
         if (skill.tools.includes('claude')) {
           if (options.allowedTools !== undefined) {
-            updateOptions.allowedTools = options.allowedTools.split(',').map(t => t.trim());
-          } else if (skill.metadata?.allowedTools) {
-            const newAllowedTools = await checkbox({
-              message: 'Allowed tools:',
-              choices: ['Read', 'Write', 'Bash', 'Grep', 'Glob'].map(t => ({
-                value: t,
-                checked: skill.metadata!.allowedTools!.includes(t),
-              })),
-            });
-            if (JSON.stringify(newAllowedTools) !== JSON.stringify(skill.metadata.allowedTools)) {
-              updateOptions.allowedTools = newAllowedTools;
+            // Validate and normalize tool names
+            const validation = validateAndNormalizeTools(options.allowedTools);
+            if (!validation.valid) {
+              console.error(chalk.red(`Error: ${validation.error}`));
+              process.exit(1);
+            }
+            updateOptions.allowedTools = validation.tools;
+          } else if (!isNonInteractive && skill.metadata?.allowedTools) {
+            try {
+              const newAllowedTools = await checkbox({
+                message: 'Allowed tools:',
+                choices: ['Read', 'Write', 'Bash', 'Grep', 'Glob', 'Edit', 'Task'].map(t => ({
+                  value: t,
+                  checked: skill.metadata!.allowedTools!.includes(t),
+                })),
+              });
+              if (JSON.stringify(newAllowedTools) !== JSON.stringify(skill.metadata.allowedTools)) {
+                updateOptions.allowedTools = newAllowedTools;
+              }
+            } catch (error: any) {
+              // Handle prompt cancellation
+              console.error(chalk.red('\nError: Interactive prompt failed.'));
+              console.error(chalk.gray("For automated execution, use flags:"));
+              console.error(chalk.gray("  opence skill update <name> --description 'New description' --allowed-tools 'Read,Write,Bash'"));
+              process.exit(1);
             }
           }
         }
@@ -339,6 +478,14 @@ export function registerSkillCommand(program: Command): void {
           if (options.shortDescription !== undefined) {
             updateOptions.shortDescription = options.shortDescription;
           }
+        }
+
+        // Check if any changes in non-interactive mode
+        if (isNonInteractive && Object.keys(updateOptions).length === 0) {
+          console.error(chalk.red('Error: No update parameters provided.'));
+          console.error(chalk.gray("Use --description or --allowed-tools flags."));
+          console.error(chalk.gray("Example: opence skill update <name> --description 'New description'"));
+          process.exit(1);
         }
 
         // Check if any changes

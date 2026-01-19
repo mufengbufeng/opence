@@ -2,7 +2,7 @@
 
 Compound engineering workflow for AI-assisted development.
 
-opence keeps Plan/Work/Review/Compound instructions, spec artifacts, and skills aligned across Claude Code, Codex, and GitHub Copilot.
+opence keeps Plan/Work/Review/Compound instructions, spec artifacts, and skills aligned across Claude Code, OpenCode, Codex, and GitHub Copilot.
 
 ## Why opence
 
@@ -13,6 +13,7 @@ opence keeps Plan/Work/Review/Compound instructions, spec artifacts, and skills 
 ## Supported tools
 
 - Claude Code (slash commands + skills)
+- OpenCode (slash commands + shared .claude/skills)
 - Codex (global prompts + repo-scoped skills)
 - GitHub Copilot (slash prompts + shared .claude/skills)
 - AGENTS.md-compatible tools (read opence/AGENTS.md)
@@ -59,7 +60,7 @@ It also generates opence Plan/Work/Review/Compound commands and skills for the t
 
 opence generates native skills using the Agent Skills format:
 
-- .claude/skills/opence-{plan,work,review,compound,archive,skill-creator}/SKILL.md (Claude Code and GitHub Copilot)
+- .claude/skills/opence-{plan,work,review,compound,archive,skill-creator}/SKILL.md (Claude Code, OpenCode, and GitHub Copilot)
 - .codex/skills/opence-{plan,work,review,compound,archive,skill-creator}/SKILL.md (Codex repo scope)
 
 The `opence-skill-creator` skill provides guidance on creating effective project skills, including naming conventions, directory structure, and best practices. The `opence-archive` skill guides the final workflow step: archiving completed changes and applying spec updates.

@@ -1,4 +1,4 @@
-export const agentsRootStubTemplate = `# opence Instructions
+export const opencodeTemplate = `# opence Instructions
 
 These instructions are for AI assistants working in this project.
 

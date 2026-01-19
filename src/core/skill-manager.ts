@@ -40,6 +40,7 @@ export interface RemoveSkillOptions {
 
 const SKILL_DIRECTORIES: Record<string, string> = {
   claude: '.claude/skills',
+  opencode: '.claude/skills', // OpenCode shares with Claude (supports .claude/skills natively)
   codex: '.codex/skills',
   'github-copilot': '.claude/skills', // GitHub Copilot shares with Claude
 };
@@ -137,10 +138,27 @@ export class SkillManager {
   async discoverConfiguredTools(projectPath: string): Promise<string[]> {
     const tools: string[] = [];
 
-    // Check for Claude/GitHub Copilot (they share the same directory)
+    // Check for Claude/GitHub Copilot/OpenCode (they share the same directory)
     const claudeDir = path.join(projectPath, '.claude/skills');
-    if (await this.hasOpenceSkills(claudeDir)) {
-      tools.push('claude');
+    const hasSharedSkills = await this.hasOpenceSkills(claudeDir);
+    
+    if (hasSharedSkills) {
+      // Check which tools are actually configured
+      const claudeConfigured = await FileSystemUtils.fileExists(path.join(projectPath, 'CLAUDE.md'));
+      const opencodeConfigured = await FileSystemUtils.fileExists(path.join(projectPath, 'OPENCODE.md')) ||
+                                  await FileSystemUtils.directoryExists(path.join(projectPath, '.opencode'));
+      
+      if (claudeConfigured) {
+        tools.push('claude');
+      }
+      if (opencodeConfigured) {
+        tools.push('opencode');
+      }
+      
+      // If no specific tool config found but skills exist, assume claude (backward compatibility)
+      if (!claudeConfigured && !opencodeConfigured) {
+        tools.push('claude');
+      }
     }
 
     // Check for Codex

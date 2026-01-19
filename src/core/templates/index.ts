@@ -1,6 +1,7 @@
 import { agentsTemplate } from './agents-template.js';
 import { projectTemplate, ProjectContext } from './project-template.js';
 import { claudeTemplate } from './claude-template.js';
+import { opencodeTemplate } from './opencode-template.js';
 import { clineTemplate } from './cline-template.js';
 import { costrictTemplate } from './costrict-template.js';
 import { agentsRootStubTemplate } from './agents-root-stub.js';
@@ -27,6 +28,10 @@ export class TemplateManager {
 
   static getClaudeTemplate(): string {
     return claudeTemplate;
+  }
+
+  static getOpenCodeTemplate(): string {
+    return opencodeTemplate;
   }
 
   static getClineTemplate(): string {

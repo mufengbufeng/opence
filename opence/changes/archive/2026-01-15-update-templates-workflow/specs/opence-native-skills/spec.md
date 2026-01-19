@@ -1,8 +1,5 @@
-# opence-native-skills Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change add-skill-creator-skill. Update Purpose after archive.
-## Requirements
 ### Requirement: Skill Creator Native Skill
 
 The system SHALL provide an `opence-skill-creator` native skill that documents skill creation conventions and best practices.
@@ -25,92 +22,6 @@ The system SHALL provide an `opence-skill-creator` native skill that documents s
 - **THEN** skill references `opence skill add` command
 - **AND** skill explains when to use CLI vs manual creation
 - **AND** skill includes examples of CLI usage
-
-### Requirement: Skill Structure Guidance
-
-The opence-skill-creator skill SHALL document the standard skill directory structure and file purposes.
-
-#### Scenario: Directory structure documented
-
-- **WHEN** AI assistant references skill-creator skill
-- **THEN** skill explains SKILL.md purpose (concise entry point)
-- **AND** skill explains references/ purpose (detailed documentation)
-- **AND** skill explains scripts/ purpose (reusable code)
-
-#### Scenario: Size guidelines provided
-
-- **WHEN** AI assistant reads structure guidance
-- **THEN** skill specifies SKILL.md should be under 200 lines
-- **AND** skill explains when to move content to references/
-- **AND** skill provides examples of good structure
-
-### Requirement: Naming Convention Documentation
-
-The skill SHALL document skill naming rules and validation criteria.
-
-#### Scenario: Naming rules explained
-
-- **WHEN** AI assistant needs to name a new skill
-- **THEN** skill specifies kebab-case requirement
-- **AND** skill lists reserved prefixes (opence-)
-- **AND** skill provides good and bad examples
-
-#### Scenario: Validation criteria listed
-
-- **WHEN** AI assistant validates skill name
-- **THEN** skill documents regex pattern: `^[a-z0-9]+(-[a-z0-9]+)*$`
-- **AND** skill explains uniqueness requirement
-- **AND** skill references CLI validation
-
-### Requirement: Frontmatter Format Reference
-
-The skill SHALL provide reference documentation for tool-specific frontmatter formats.
-
-#### Scenario: Claude/Copilot format documented
-
-- **WHEN** AI assistant creates skill for Claude or GitHub Copilot
-- **THEN** references/ includes allowed-tools examples
-- **AND** references/ includes user-invocable field explanation
-- **AND** references/ includes context field usage
-
-#### Scenario: Codex format documented
-
-- **WHEN** AI assistant creates skill for Codex
-- **THEN** references/ includes metadata.short-description format
-- **AND** references/ explains field purpose
-- **AND** references/ provides complete example
-
-#### Scenario: Format differences explained
-
-- **WHEN** AI assistant reads frontmatter reference
-- **THEN** references/ explains why formats differ
-- **AND** references/ notes CLI handles formats automatically
-- **AND** references/ shows side-by-side comparison
-
-### Requirement: Best Practices Documentation
-
-The skill SHALL include best practices for skill creation and maintenance.
-
-#### Scenario: Creation workflow documented
-
-- **WHEN** AI assistant prepares to create skill
-- **THEN** skill recommends using `opence skill add` first
-- **AND** skill explains when manual creation is needed
-- **AND** skill lists post-creation checklist
-
-#### Scenario: Content guidelines provided
-
-- **WHEN** AI assistant writes skill content
-- **THEN** skill recommends clear "When to use" section
-- **AND** skill recommends concrete examples
-- **AND** skill recommends avoiding duplication with other skills
-
-#### Scenario: Testing guidance included
-
-- **WHEN** AI assistant completes skill creation
-- **THEN** skill recommends verifying with `opence skill show`
-- **AND** skill suggests testing in actual usage scenario
-- **AND** skill notes version control considerations
 
 ### Requirement: Integration with Compound Workflow
 
@@ -272,6 +183,8 @@ The system SHALL provide an `opence-archive` prompt that guides the AI assistant
 - **THEN** it contains steps to finalize the change
 - **AND** it references `opence-archive` skill for verification steps
 
+## ADDED Requirements
+
 ### Requirement: Template Workflow Accuracy
 
 The system SHALL provide template files that accurately reflect the current opence workflow stages.
@@ -310,4 +223,3 @@ Template files SHALL be refreshable via `opence update` to reflect workflow chan
 - **THEN** it contains only the minimal reference to AGENTS.md
 - **AND** it references the five-stage workflow
 - **AND** it maintains the OPENCE:START/END block structure
-

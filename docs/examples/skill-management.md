@@ -26,10 +26,30 @@ You'll be prompted for:
 
 ### Non-interactive mode
 
+Provide flags to skip interactive prompts. This is ideal for AI assistants and automation:
+
 ```bash
 opence skill add deployment-guide \
   --description "Guidelines for deploying to production" \
   --allowed-tools "Read,Write,Bash"
+```
+
+The `--non-interactive` flag is optional and auto-detected when other flags are provided:
+
+```bash
+# These are equivalent
+opence skill add my-skill --description "My description"
+opence skill add my-skill --description "My description" --non-interactive
+```
+
+If `--allowed-tools` is omitted in non-interactive mode, defaults to: `Read,Write,Edit,Grep,Glob,Bash`
+
+Tool names are case-insensitive and whitespace is trimmed:
+
+```bash
+# All valid - will be normalized
+opence skill add my-skill --description "Test" --allowed-tools "read,write"
+opence skill add my-skill --description "Test" --allowed-tools " Read , Write "
 ```
 
 ### What gets created
@@ -145,11 +165,17 @@ Prompts show current values as defaults. Press Enter to keep unchanged.
 
 ### Non-interactive mode
 
+Update without prompts by providing flags:
+
 ```bash
 opence skill update api-testing \
   --description "Updated guidelines for API testing" \
   --allowed-tools "Read,Write,Bash,Grep"
 ```
+
+Auto-detects non-interactive mode when flags are provided (no need for `--non-interactive`).
+
+At least one update parameter is required in non-interactive mode.
 
 Changes are applied to all tool directories where the skill exists.
 
@@ -272,6 +298,30 @@ Then reference it in your `docs/solutions/` documentation.
 
 Run `opence init` first to configure at least one AI tool.
 
+### "Description is required in non-interactive mode"
+
+When running in CI/CD or providing flags, you must include `--description`:
+
+```bash
+# Error
+opence skill add my-skill
+
+# Fixed
+opence skill add my-skill --description "My skill description"
+```
+
+### "Invalid tool name(s)"
+
+Valid tool names: Read, Write, Edit, Grep, Glob, Bash, Task, TodoRead, TodoWrite, Question, Skill, WebFetch
+
+```bash
+# Error
+opence skill add my-skill --description "Test" --allowed-tools "FakeTool"
+
+# Fixed
+opence skill add my-skill --description "Test" --allowed-tools "Read,Write"
+```
+
 ### Skill not appearing in IDE
 
 Restart your IDE after creating skills. Most tools load skills at startup.
@@ -299,11 +349,24 @@ opence skill show my-skill --json | jq -r '.content' > backup.md
 ### Bulk operations
 
 ```bash
-# Create multiple skills
+# Create multiple skills non-interactively
 for skill in api-testing db-migration error-recovery; do
-  opence skill add $skill --description "Description for $skill"
+  opence skill add $skill --description "Guidelines for $skill"
 done
 
 # List skills by tool
 opence skill list --json | jq '.user[] | select(.tools | contains(["claude"]))'
+```
+
+### CI/CD integration
+
+opence automatically detects CI environments (via `CI=true` or non-TTY stdin) and requires explicit flags:
+
+```yaml
+# GitHub Actions example
+- name: Create skill
+  run: |
+    opence skill add deployment-checks \
+      --description "Pre-deployment validation steps" \
+      --allowed-tools "Read,Bash"
 ```

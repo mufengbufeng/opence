@@ -800,7 +800,7 @@ export class InitCommand {
     toolIds: string[]
   ): Promise<void> {
     const wantsClaudeSkills =
-      toolIds.includes('claude') || toolIds.includes('github-copilot');
+      toolIds.includes('claude') || toolIds.includes('opencode') || toolIds.includes('github-copilot');
     const wantsCodexSkills = toolIds.includes('codex');
 
     if (wantsClaudeSkills) {

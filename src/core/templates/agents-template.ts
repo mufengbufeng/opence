@@ -7,12 +7,16 @@ Instructions for AI coding assistants using opence for spec-driven development.
 - Search existing work: \`opence spec list --long\`, \`opence list\` (use \`rg\` only for full-text search)
 - Decide scope: new capability vs modify existing capability
 - Pick a unique \`change-id\`: kebab-case, verb-led (\`add-\`, \`update-\`, \`remove-\`, \`refactor-\`)
-- Scaffold: \`proposal.md\`, \`tasks.md\`, \`design.md\` (only if needed), and delta specs per affected capability
+- **Plan**: Scaffold \`proposal.md\`, \`tasks.md\`, \`design.md\` (only if needed), and delta specs per affected capability
+- **Work**: Implement tasks sequentially, keeping edits focused
+- **Review**: Report issues ordered by severity with file paths
+- **Compound**: Document learnings in \`docs/solutions/\` and capture repeatable workflows as skills
+- **Archive**: Run \`opence archive <change-id>\` to apply spec deltas and mark complete
 - Write deltas: use \`## ADDED|MODIFIED|REMOVED|RENAMED Requirements\`; include at least one \`#### Scenario:\` per requirement
 - Validate: \`opence validate [change-id] --strict\` and fix issues
 - Request approval: Do not start work until the plan is approved
 
-## Plan/Work/Review/Compound Workflow
+## Plan/Work/Review/Compound/Archive Workflow
 
 ### Plan
 Create a plan when you need to:
@@ -64,8 +68,22 @@ Provide a review when changes are ready for validation.
 After the change is complete:
 - Capture the problem, root cause, and fix in \`docs/solutions/\`.
 - If the change reveals a repeatable workflow or recurring manual checks, create/update a skill to capture it (follow the skill-creator guidance: keep SKILL.md concise with name/description frontmatter; use \`references/\` and \`scripts/\` for longer content).
-- Prompt to run \`opence archive <change-id>\` when documentation is complete.
-- Run \`opence validate --strict\` if anything looks off before archiving.
+- Consult the \`opence-archive\` skill to finalize the change.
+
+### Archive
+Finalize the change and apply spec updates:
+1. Complete pre-archive verification:
+   - Run \`opence validate <change-id> --strict\` and ensure it passes
+   - Verify all tasks in \`tasks.md\` are marked [x] and reflect reality
+   - Confirm proposal matches implementation
+2. Run \`opence archive <change-id>\` to move the change to archive and apply spec deltas
+3. Verify specs in \`opence/specs/\` are updated correctly
+4. Update spec Purpose sections if needed
+
+**Archive command flags:**
+- \`--yes\`/\`-y\` - Skip confirmation prompts (for automation)
+- \`--skip-specs\` - Archive without applying spec updates (use rarely)
+- \`--no-validate\` - Skip pre-archive validation (not recommended)
 
 ## Before Any Task
 
@@ -95,24 +113,29 @@ After the change is complete:
 ### CLI Commands
 
 \`\`\`bash
-# Essential commands
+# Workflow commands (correspond to Plan/Work/Review/Compound/Archive stages)
 opence list                  # List active changes
 opence list --specs          # List specifications
-opence show [item]           # Display change or spec
+opence show [item]           # Display change or spec details
 opence validate [item]       # Validate changes or specs
-opence archive <change-id> [--yes|-y]   # Archive after deployment (add --yes for non-interactive runs)
+opence archive <change-id>   # Finalize change and apply spec deltas
+
+# Archive flags
+opence archive <change-id> --yes|-y     # Skip confirmation prompts
+opence archive <change-id> --skip-specs # Archive without applying spec updates
+opence archive <change-id> --no-validate # Skip pre-archive validation (not recommended)
 
 # Project management
-opence init [path]           # Initialize opence
+opence init [path]           # Initialize opence in a project
 opence update [path]         # Update instruction files
 
 # Interactive mode
-opence show                  # Prompts for selection
+opence show                  # Prompts for item selection
 opence validate              # Bulk validation mode
 
 # Debugging
-opence show [change] --json --deltas-only
-opence validate [change] --strict
+opence show [change] --json --deltas-only  # Show spec deltas in JSON
+opence validate [change] --strict          # Comprehensive validation
 \`\`\`
 
 ### Command Flags
@@ -120,9 +143,9 @@ opence validate [change] --strict
 - \`--json\` - Machine-readable output
 - \`--type change|spec\` - Disambiguate items
 - \`--strict\` - Comprehensive validation
-- \`--no-interactive\` - Disable prompts
-- \`--skip-specs\` - Archive without spec updates
-- \`--yes\`/\`-y\` - Skip confirmation prompts (non-interactive archive)
+- \`--yes\`/\`-y\` - Skip confirmation prompts (archive command)
+- \`--skip-specs\` - Archive without applying spec updates
+- \`--no-validate\` - Skip pre-archive validation (archive command)
 
 ## Directory Structure
 
